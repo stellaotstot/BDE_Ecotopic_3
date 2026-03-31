@@ -24,18 +24,65 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Code
 
+## set up
+```{r}
+library(dataRetrieval)
+library(ggplot2)
+library(dplyr)
+```
+
+
 ## Data Wrangling
 
 ### Read in Data
+
+**Site Choice**
+> 2 sites from each upperwidwest state
+> Must have data on: 
+  > Dissolved oxygen, water, unfiltered, milligrams per liter
+  > Turbidity, water, unfiltered, monochrome near infra-red LED light, 780-900 nm, detection angle 90 +-2.5 degrees, formazin nephelometric units (FNU)
+
+*Wisconsin:*
+Menominee River Near MC Allister, WI - USGS-04067500
+FOX R. CANAL AT LOCK & DAM No. 2 AT KAUKAUNA, WI - USGS-04084485
+Milwaukee River at Mouth at Milwaukee, WI - USGS-04087170
+Manitowoc River at Manitowoc, WI - USGS-04085427
+
+*Minnesota*
+St. Louis River at Scanlon, MN - USGS-04024000
+Red River of the North Near Georgetown, MN - USGS-05062130
+
+*Michigan*
+Mineral River DS of Native CK NR Silver City, MI - USGS-040325155
+M BR Escanaba R at US Hwy 41 NR Humboldt, MI - USGS-04057801
+AU Sable River Near Glennie, MI - USGS-04137025
+Lower River Rouge at Dearborn, MI - USGS-04168400
+
 ```{r}
-# Find all sites across the us that have water oxygen data
+# Find all sites across the us that have water oxygen data 
 whatNWISsites()
-oxy_sites <- whatNWISsites(stateCd = c("MN", "WI"), parameterCd = "00300")
+oxy_sites <- whatNWISsites(stateCd = c("MN", "WI"), parameterCd = "00300") #does not run on stellas R 
+```
 
+```{r}
+# make site vectors 
+Wisconsin_sites <- c("USGS-04067500", "USGS-04084485", "USGS-04087170", "USGS-04085427")
+Minnesota_sites <- c("USGS-04024000", "USGS-05062130")
+Michigan_sites <- c("USGS-040325155", "USGS-04057801", "USGS-04137025", "USGS-04168400")
 
-# read in data for these sites (just oxygen var or others too?) 
+# make variable vectors
+sites <- c(Wisconsin_sites, Minnesota_sites, Michigan_sites)
+param_code <- "00300"
+start <- "2010-01-01"
+end <- "2025-01-01"
+zone = "America/Chicago"
 
-## day data or continuous data?
+# read in data
+waterdat <- read_waterdata_daily(
+  monitoring_location_id = sites,
+  parameter_code = param_code,
+  time = as.POSIXct(c(start, end), 
+  tz = zone))
 ```
 
 ### Variable wranging
@@ -56,6 +103,9 @@ oxy_sites <- whatNWISsites(stateCd = c("MN", "WI"), parameterCd = "00300")
 ```
 
 # future ideas
+> make onx map of all sites for presentation
+
+### Analysis
 ```{r}
 # water oxygen vs other var
 ```
