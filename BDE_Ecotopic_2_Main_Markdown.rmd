@@ -1,0 +1,10 @@
+---
+title: "Ecotopic_3_Main_Markdown"
+author: "Stellaria Otstot"
+date: "2026-03-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
