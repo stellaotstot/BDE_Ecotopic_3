@@ -3,6 +3,9 @@ title: "Ecotopic_3_Main_Markdown"
 author: "Stellaria Otstot"
 date: "2026-03-31"
 output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -21,42 +24,57 @@ knitr::opts_chunk$set(echo = TRUE)
 
 > H etc
 
-
 # Code
 
 ## set up
+
 ```{r}
 library(dataRetrieval)
 library(ggplot2)
 library(dplyr)
 ```
 
-
 ## Data Wrangling
 
 ### Read in Data
 
 **Site Choice**
-> 2 sites from each upperwidwest state
-> Must have data on: 
-  > Dissolved oxygen, water, unfiltered, milligrams per liter
-  > Turbidity, water, unfiltered, monochrome near infra-red LED light, 780-900 nm, detection angle 90 +-2.5 degrees, formazin nephelometric units (FNU)
 
-*Wisconsin:*
-Menominee River Near MC Allister, WI - USGS-04067500
-FOX R. CANAL AT LOCK & DAM No. 2 AT KAUKAUNA, WI - USGS-04084485
-Milwaukee River at Mouth at Milwaukee, WI - USGS-04087170
-Manitowoc River at Manitowoc, WI - USGS-04085427
+> 2 sites from each upper widwest state (MN, MI, WI)
+>
+> Must have data on:
+>
+> > Dissolved oxygen, water, unfiltered, milligrams per liter
+> >
+> > Turbidity, water, unfiltered, monochrome near infra-red LED light,
+> > 780-900 nm, detection angle 90 +-2.5 degrees, formazin nephelometric
+> > units (FNU)
 
-*Minnesota*
-St. Louis River at Scanlon, MN - USGS-04024000
-Red River of the North Near Georgetown, MN - USGS-05062130
+> *Wisconsin:*
+>
+> Menominee River Near MC Allister, WI - USGS-04067500
+>
+> FOX R. CANAL AT LOCK & DAM No. 2 AT KAUKAUNA, WI - USGS-04084485
+>
+> Milwaukee River at Mouth at Milwaukee, WI - USGS-04087170
+>
+> Manitowoc River at Manitowoc, WI - USGS-04085427
 
-*Michigan*
-Mineral River DS of Native CK NR Silver City, MI - USGS-040325155
-M BR Escanaba R at US Hwy 41 NR Humboldt, MI - USGS-04057801
-AU Sable River Near Glennie, MI - USGS-04137025
-Lower River Rouge at Dearborn, MI - USGS-04168400
+> *Minnesota*
+>
+> St. Louis River at Scanlon, MN - USGS-04024000
+>
+> Red River of the North Near Georgetown, MN - USGS-05062130
+
+> *Michigan*
+>
+> Mineral River DS of Native CK NR Silver City, MI - USGS-040325155
+>
+> M BR Escanaba R at US Hwy 41 NR Humboldt, MI - USGS-04057801
+>
+> AU Sable River Near Glennie, MI - USGS-04137025
+>
+> Lower River Rouge at Dearborn, MI - USGS-04168400
 
 ```{r}
 # Find all sites across the us that have water oxygen data 
@@ -86,6 +104,7 @@ waterdat <- read_waterdata_daily(
 ```
 
 ### Variable wranging
+
 ```{r}
 # make seasonal buckets for data
 
@@ -95,6 +114,7 @@ waterdat <- read_waterdata_daily(
 ```
 
 # visualizations
+
 ```{r}
 # plot average water oxygen over time for each site (line/scatter plot)
   ## on this plot have line that corresponds to healthy threshold
@@ -103,26 +123,25 @@ waterdat <- read_waterdata_daily(
 ```
 
 # future ideas
+
 > make onx map of all sites for presentation
 
 ### Analysis
+
 ```{r}
 # water oxygen vs other var
 ```
 
-
 # Notes
 
-look at what sites are available for a given parameter
-characterize the parameter 
-- for a given site what is the variation of o for a year (first figure) oxygen at each site over time
-- is the amplitude across a year variable across site? 
-- what are healthy ranges of oxygen and how many sites are above/below the threshold?
-- what are our hypotheses why this range?
-- anova comparing differences between sites (min or av oxygen (for each season?))
+look at what sites are available for a given parameter characterize the
+parameter - for a given site what is the variation of o for a year
+(first figure) oxygen at each site over time - is the amplitude across a
+year variable across site? - what are healthy ranges of oxygen and how
+many sites are above/below the threshold? - what are our hypotheses why
+this range? - anova comparing differences between sites (min or av
+oxygen (for each season?))
 
-what are potential drivers of this var
-- correlate two parameters
+what are potential drivers of this var - correlate two parameters
 
-start with oxygen and then maybe add in more vars 
-- 
+## start with oxygen and then maybe add in more vars
