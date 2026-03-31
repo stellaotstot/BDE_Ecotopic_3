@@ -30,6 +30,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 # Find all sites across the us that have water oxygen data
 whatNWISsites()
+oxy_sites <- whatNWISsites(stateCd = c("MN", "WI"), parameterCd = "00300")
+
 
 # read in data for these sites (just oxygen var or others too?) 
 
