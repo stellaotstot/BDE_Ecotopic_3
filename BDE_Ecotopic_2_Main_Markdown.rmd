@@ -43,10 +43,20 @@ whatNWISsites()
 # calculate seasonal means/mins/maxs/range/amplitude
 
 # make new var that declares whether av/max/min/whatever is above or below healthy threshold (based on lit)
-
-
 ```
 
+# visualizations
+```{r}
+# plot average water oxygen over time for each site (line/scatter plot)
+  ## on this plot have line that corresponds to healthy threshold
+
+# 
+```
+
+# future ideas
+```{r}
+# water oxygen vs other var
+```
 
 
 # Notes
