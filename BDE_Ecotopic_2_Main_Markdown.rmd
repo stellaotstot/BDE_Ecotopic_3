@@ -8,3 +8,59 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+# Research Question
+
+> How does stream oxygen conc vary across time and space?
+
+## Hypotheses
+
+> H1
+
+> H0
+
+> H etc
+
+
+# Code
+
+## Data Wrangling
+
+### Read in Data
+```{r}
+# Find all sites across the us that have water oxygen data
+whatNWISsites()
+
+# read in data for these sites (just oxygen var or others too?) 
+
+## day data or continuous data?
+```
+
+### Variable wranging
+```{r}
+# make seasonal buckets for data
+
+# calculate seasonal means/mins/maxs/range/amplitude
+
+# make new var that declares whether av/max/min/whatever is above or below healthy threshold (based on lit)
+
+
+```
+
+
+
+# Notes
+
+look at what sites are available for a given parameter
+characterize the parameter 
+- for a given site what is the variation of o for a year (first figure) oxygen at each site over time
+- is the amplitude across a year variable across site? 
+- what are healthy ranges of oxygen and how many sites are above/below the threshold?
+- what are our hypotheses why this range?
+- anova comparing differences between sites (min or av oxygen (for each season?))
+
+what are potential drivers of this var
+- correlate two parameters
+
+start with oxygen and then maybe add in more vars 
+- 
