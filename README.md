@@ -1,8 +1,8 @@
 This project explores the temporal and spatial relationship of disolved oxygen levels in various streams across the upper midwest
 
-**Lit:**
+### Lit:
 
-Title: 
+**Title:** 
 Appropriate disolved oxygen level from met council
 
 Link:
