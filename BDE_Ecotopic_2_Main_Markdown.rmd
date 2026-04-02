@@ -103,12 +103,24 @@ waterdat <- read_waterdata_daily(
   tz = zone))
 ```
 
+
 ### Variable wranging
 
 ```{r}
 # make seasonal buckets for data
+waterdat_cleaned <- waterdat %>%
+  mutate(md = format(time, "%m-%d")) %>%
+  mutate(season = case_when(md >= "03-01" & md <= "05-31" ~ "Spring",
+                            md >= "06-01" & md <= "08-31" ~ "Summer",
+                            md >= "09-01" & md <= "11-30" ~ "Fall",
+                            TRUE ~"Winter"))
+                           
 
 # calculate seasonal means/mins/maxs/range/amplitude
+
+waterdat_cleaned %>%
+  group_by(season, monitoring_location_id) %>%
+  summarise(mean_o = mean(value)) # mean O level
 
 # make new var that declares whether av/max/min/whatever is above or below healthy threshold (based on lit)
 ```
@@ -118,6 +130,14 @@ waterdat <- read_waterdata_daily(
 ```{r}
 # plot average water oxygen over time for each site (line/scatter plot)
   ## on this plot have line that corresponds to healthy threshold
+
+waterdat_cleaned %>%
+  mutate(location = case_when(monitoring_location_id %in% Michigan_sites ~ "Michigan",
+                              monitoring_location_id %in% Minnesota_sites ~ "Minnesota",
+                              monitoring_location_id %in% Wisconsin_sites ~ "Wisconsin")) %>%
+  group_by(monitoring_location_id, time) %>%
+  mutate(mean_o = mean(value)) %>%
+  dplyr::distinct(time, .keep_all = TRUE)
 
 # 
 ```
