@@ -79,11 +79,7 @@ library(lubridate)
 >
 > Lower River Rouge at Dearborn, MI - USGS-04168400
 
-```{r}
-# Find all sites across the us that have water oxygen data 
-whatNWISsites()
-oxy_sites <- whatNWISsites(stateCd = c("MN", "WI"), parameterCd = "00300") #does not run on stellas R 
-```
+# Code
 
 ```{r}
 # make site vectors 
