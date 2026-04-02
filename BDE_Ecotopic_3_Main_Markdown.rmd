@@ -159,8 +159,23 @@ states_cleaned %>%
 > make onx map of all sites for presentation
 
 ```{r}
+  
+water_dat_labeled_sites <- states_cleaned %>%
+  filter(statistic_id == "00003") %>%
+  mutate(site_name = case_when(monitoring_location_id == "USGS-04067500" ~ "Menominee River",
+                               monitoring_location_id == "USGS-04084485" ~ "FOX R. CANAL AT LOCK & DAM",
+                               monitoring_location_id == "USGS-04087170" ~ "Milwaukee River",
+                               monitoring_location_id == "USGS-04085427" ~ "Manitowoc River",
+                               monitoring_location_id == "USGS-04024000" ~ "St. Louis River",
+                               monitoring_location_id == "USGS-05062130" ~ "Red River",
+                               monitoring_location_id == "USGS-040325155" ~ "Mineral River DS",
+                               monitoring_location_id == "USGS-04057801" ~ "M BR Escanaba R",
+                               monitoring_location_id == "USGS-04137025" ~ "AU Sable River",
+                               monitoring_location_id == "USGS-04168400" ~ "Lower River Rouge"))
+
 map <- plot_usmap(include = .midwest_region, labels = TRUE) +
-  geom_sf(data = waterdat, color = "blue", size = 4, shape = 8)
+  geom_sf(data = water_dat_labeled_sites, color = "blue", size = 4, shape = 8) +
+  geom_sf_text(data = water_dat_labeled_sites, aes(label = site_name))
   
 map
 ```
