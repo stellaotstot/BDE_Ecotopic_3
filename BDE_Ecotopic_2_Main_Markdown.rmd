@@ -32,6 +32,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dataRetrieval)
 library(ggplot2)
 library(dplyr)
+library(usmap)
+library(sf)
 ```
 
 ## Data Wrangling
@@ -147,11 +149,10 @@ waterdat_cleaned %>%
 > make onx map of all sites for presentation
 
 ```{r}
-library(usmap)
-plot_usmap(include = .midwest_region, labels = TRUE) +
+map <- plot_usmap(include = .midwest_region, labels = TRUE) +
   geom_sf(data = waterdat, color = "blue", size = 4, shape = 8)
   
-
+map
 ```
 
 
