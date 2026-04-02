@@ -121,6 +121,7 @@ waterdat_cleaned <- waterdat %>%
 # calculate seasonal means/mins/maxs/range/amplitude
 
 waterdat_cleaned %>%
+  filter(statistic_id == "00003") %>%
   group_by(season, monitoring_location_id) %>%
   summarise(mean_o = mean(value)) # mean O level
 
