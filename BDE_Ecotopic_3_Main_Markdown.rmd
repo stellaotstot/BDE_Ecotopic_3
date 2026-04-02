@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Hypotheses
 
-> H1
+> 
 
 > H0
 
@@ -34,6 +34,7 @@ library(ggplot2)
 library(dplyr)
 library(usmap)
 library(sf)
+library(lubridate)
 ```
 
 ## Data Wrangling
@@ -134,15 +135,27 @@ waterdat_cleaned %>%
 # plot average water oxygen over time for each site (line/scatter plot)
   ## on this plot have line that corresponds to healthy threshold
 
-waterdat_cleaned %>%
+states_cleaned <- waterdat_cleaned %>%
   mutate(location = case_when(monitoring_location_id %in% Michigan_sites ~ "Michigan",
                               monitoring_location_id %in% Minnesota_sites ~ "Minnesota",
                               monitoring_location_id %in% Wisconsin_sites ~ "Wisconsin")) %>%
   group_by(monitoring_location_id, time) %>%
-  mutate(mean_o = mean(value)) %>%
-  dplyr::distinct(time, .keep_all = TRUE)
+  mutate(mean_o_state = mean(value)) %>%
+  mutate(year = year(time))
+  
+states_cleaned %>%
+  filter(statistic_id == "00003") %>%
+  ggplot(aes(x = season, y = value, color = location)) +
+  geom_boxplot() +
+  theme_minimal()
 
-# 
+states_cleaned %>%
+  filter(statistic_id == "00002") %>%
+  ggplot(aes(x = season, y = value, color = location)) +
+  geom_boxplot() +
+  geom_hline(yintercept = 5) +
+  theme_minimal()
+
 ```
 
 # future ideas
