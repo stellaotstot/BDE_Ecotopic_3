@@ -100,6 +100,15 @@ waterdat <- read_waterdata_daily(
   parameter_code = param_code,
   time = as.POSIXct(c(start, end), 
   tz = zone))
+
+
+  
+# find all locations with dissolved oxygen
+# dO_locations <- unique(unlist(dO_data_avail$monitoring_location_id))
+# dO_data <- read_waterdata_daily(monitoring_location_id = dO_locations, 
+#                                 parameter_code = "00300")
+# unique(unlist(dO_data$monitoring_location_id))
+
 ```
 
 
@@ -149,8 +158,22 @@ states_cleaned %>%
   filter(statistic_id == "00002") %>%
   ggplot(aes(x = season, y = value, color = location)) +
   geom_boxplot() +
-  geom_hline(yintercept = 5) +
+  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6) +
   theme_minimal()
+
+states_cleaned %>%
+  filter(statistic_id == "00002") %>%
+  ggplot(aes(x = time, y = value, color = monitoring_location_id)) +
+  geom_line() +
+  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "red") +
+  facet_wrap(~location)
+
+dO_data_avail <- read_waterdata_ts_meta(parameter_code = "00300") 
+
+dO_data_avail <- dO_data_avail %>% 
+  filter(computation_identifier == "Mean") %>%
+  filter(state_name %in% c("Minnesota", "Wisconsin", "Michigan"))
+
 
 ```
 
