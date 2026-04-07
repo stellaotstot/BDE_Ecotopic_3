@@ -111,7 +111,7 @@ waterdat <- read_waterdata_daily(
 ```
 
 
-### Variable wranging
+### Data Wranging
 
 ```{r}
 # make seasonal buckets for data
@@ -124,20 +124,14 @@ waterdat_cleaned <- waterdat %>%
                            
 
 # calculate seasonal means/mins/maxs/range/amplitude
-
 waterdat_cleaned %>%
   filter(statistic_id == "00003") %>%
   group_by(season, monitoring_location_id)
-
-# make new var that declares whether av/max/min/whatever is above or below healthy threshold (based on lit)
 ```
 
-# visualizations
 
 ```{r}
-# plot average water oxygen over time for each site (line/scatter plot)
-  ## on this plot have line that corresponds to healthy threshold
-
+# name sites and filter for means
 states_cleaned <- waterdat_cleaned %>%
   mutate(location = case_when(monitoring_location_id %in% Michigan_sites ~ "Michigan",
                               monitoring_location_id %in% Minnesota_sites ~ "Minnesota",
@@ -153,52 +147,10 @@ states_cleaned <- waterdat_cleaned %>%
                                monitoring_location_id == "USGS-04137025" ~ "AU Sable River",
                                monitoring_location_id == "USGS-04168400" ~ "Lower River Rouge")) %>%
   group_by(monitoring_location_id, time) %>%
-  #mutate(mean_o_state = mean(value)) %>%
   mutate(year = year(time))
-
-dO_data_avail <- read_waterdata_ts_meta(parameter_code = "00300") 
-
-dO_data_avail <- dO_data_avail %>% 
-  filter(computation_identifier == "Mean") %>%
-  filter(state_name %in% c("Minnesota", "Wisconsin", "Michigan"))
 ```
 
 ```{r}
-states_cleaned %>%
-  filter(parameter_code == "00300") %>%
-  filter(statistic_id == "00003") %>%
-  ggplot(aes(x = season, y = value, color = location)) +
-  geom_boxplot() +
-  theme_minimal()
-
-states_cleaned %>%
-  filter(statistic_id == "00002") %>%
-  filter(parameter_code == "00300") %>%
-  ggplot(aes(x = season, y = value, color = location)) +
-  geom_boxplot() +
-  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6) +
-  theme_minimal()
-
-states_cleaned %>%
-  filter(statistic_id == "00002") %>%
-  filter(parameter_code == "00300") %>%
-  filter(!(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River"))) %>%
-  ggplot(aes(x = time, y = value, color = location)) +
-  geom_line() +
-  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "red") +
-  facet_wrap(~site_name, ncol = 1) +
-  theme_minimal()
-
-states_cleaned %>%
-  filter(statistic_id == "00002") %>%
-  filter(parameter_code == "00300") %>%
-  filter(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River")) %>%
-  ggplot(aes(x = time, y = value, color = location)) +
-  geom_line() +
-  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "red") +
-  facet_wrap(~site_name, ncol = 1) +
-  theme_minimal()
-
 states_cleaned_wide <- states_cleaned %>%
   select(-unit_of_measure, -last_modified) %>%
   filter(statistic_id == "00003") %>%
@@ -211,24 +163,101 @@ states_cleaned_wide <- states_cleaned %>%
               names_from = parameter_name,
               values_from = value,
               values_fn = mean)
-
-test <- states_cleaned_wide %>%
-  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(turbulence))) +
-  geom_point()
-test
-
-test <- states_cleaned %>%
-  mutate(parameter_name = if_else(parameter_code == "00300", "dissolved_o", "temperature")) %>%
-  pivot_wider(names_from = parameter_name, values_from = value) %>%
-  na.omit()
-  
-  ggplot(aes)
 ```
 
-# future ideas
+# Visualizations
 
-> make onx map of all sites for presentation
+## Preliminary, sigle parameter visualizations RQ1
+```{r}
+p1 <- states_cleaned %>%
+  filter(parameter_code == "00300") %>%
+  filter(statistic_id == "00003") %>%
+  ggplot(aes(x = season, y = value, color = location)) +
+  geom_boxplot() +
+  theme_minimal()
+p1
 
+p2 <-states_cleaned %>%
+  filter(statistic_id == "00002") %>%
+  filter(parameter_code == "00300") %>%
+  ggplot(aes(x = season, y = value, color = location)) +
+  geom_boxplot() +
+  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.8, color = "red") +
+  theme_minimal()
+p2
+
+p3 <- states_cleaned %>%
+  filter(statistic_id == "00002") %>%
+  filter(parameter_code == "00300") %>%
+  filter(!(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River"))) %>%
+  ggplot(aes(x = time, y = value, color = location)) +
+  geom_line() +
+  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "red") +
+  facet_wrap(~site_name, ncol = 1) +
+  theme_minimal()
+p3
+
+p4 <- states_cleaned %>%
+  filter(statistic_id == "00002") %>%
+  filter(parameter_code == "00300") %>%
+  filter(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River")) %>%
+  ggplot(aes(x = time, y = value, color = location)) +
+  geom_line() +
+  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "red") +
+  facet_wrap(~site_name, ncol = 1) +
+  theme_minimal()
+p4
+```
+
+## multi var visualizations RQ2
+```{r}
+#### turbulence
+# general
+p5 <- states_cleaned_wide %>%
+  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(turbulence))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+p5
+
+# color by site wrao by state
+p6 <- states_cleaned_wide %>%
+  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(turbulence), color = site_name)) +
+  facet_wrap(~location, ncol = 1) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+p6
+
+#### temp
+# general
+p7 <- states_cleaned_wide %>%
+  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(temperature))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+p7
+
+# color by site wrap by state
+p8 <- states_cleaned_wide %>%
+  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(temperature), color = site_name)) +
+  facet_wrap(~location, ncol = 1) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+p8
+
+# no points (less clutter)
+p9 <- states_cleaned_wide %>%
+  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(temperature), color = site_name)) +
+  facet_wrap(~location, ncol = 1) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal()
+p9
+```
+
+
+## Map of study sites
 ```{r}
   
 water_dat_labeled_sites <- states_cleaned %>%
@@ -252,12 +281,6 @@ map
 ```
 
 
-### Analysis
-
-```{r}
-# water oxygen vs other var
-```
-
 # Notes
 
 look at what sites are available for a given parameter characterize the
@@ -269,12 +292,11 @@ this range? - anova comparing differences between sites (min or av
 oxygen (for each season?))
 
 what are potential drivers of this var - correlate two parameters
+- start with oxygen and then maybe add in more vars
 
-## start with oxygen and then maybe add in more vars
-
+# Apendix
 
 ## Variable importance analysis
-
 ```{r}
 # read in data
 varimp <- read_waterdata_daily(
@@ -288,5 +310,14 @@ varimp_clean <- varimp %>%
  
 varimp_wide <- varimp_clean %>%
   pivot_wider(names_from = parameter_code, values_from = value)
+```
+
+# code to find availble data for usgs sites
+```{r}
+dO_data_avail <- read_waterdata_ts_meta(parameter_code = "00300") 
+
+dO_data_avail <- dO_data_avail %>% 
+  filter(computation_identifier == "Mean") %>%
+  filter(state_name %in% c("Minnesota", "Wisconsin", "Michigan"))
 ```
 
