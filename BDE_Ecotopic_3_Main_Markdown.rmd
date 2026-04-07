@@ -153,7 +153,7 @@ states_cleaned <- waterdat_cleaned %>%
                                monitoring_location_id == "USGS-04137025" ~ "AU Sable River",
                                monitoring_location_id == "USGS-04168400" ~ "Lower River Rouge")) %>%
   group_by(monitoring_location_id, time) %>%
-  mutate(mean_o_state = mean(value)) %>%
+  #mutate(mean_o_state = mean(value)) %>%
   mutate(year = year(time))
 
 dO_data_avail <- read_waterdata_ts_meta(parameter_code = "00300") 
@@ -200,17 +200,17 @@ states_cleaned %>%
   theme_minimal()
 
 states_cleaned_wide <- states_cleaned %>%
-  select(-unit_of_measure, -last_modified, -time_series_id) %>%
+  select(-unit_of_measure, -last_modified) %>%
   filter(statistic_id == "00003") %>%
   mutate(parameter_name = case_when(parameter_code == "00300" ~ "dissolved_oxygen",
                                     parameter_code == "00010" ~ "temperature",
                                     parameter_code == "63680" ~ "turbulence",
                                     TRUE ~ "other")) %>%
   select(-parameter_code) %>%
-  pivot_wider(names_from = parameter_name, values_from = value)
-
-%>%
-  mutate(turbulence = na_if(turbulence, "NULL"))
+  pivot_wider(id_cols = !time_series_id,
+              names_from = parameter_name,
+              values_from = value,
+              values_fn = mean)
 
 test <- states_cleaned_wide %>%
   ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(turbulence))) +
