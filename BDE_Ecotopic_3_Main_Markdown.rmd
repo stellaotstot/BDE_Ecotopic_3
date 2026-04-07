@@ -146,8 +146,7 @@ states_cleaned <- waterdat_cleaned %>%
                               monitoring_location_id %in% Wisconsin_sites ~ "Wisconsin")) %>%
   group_by(monitoring_location_id, time) %>%
   mutate(mean_o_state = mean(value)) %>%
-  mutate(year = year(time)) %>%
-  
+  mutate(year = year(time))
   
 states_cleaned %>%
   filter(statistic_id == "00003") %>%
