@@ -154,11 +154,6 @@ states_cleaned <- waterdat_cleaned %>%
                                monitoring_location_id == "USGS-04168400" ~ "Lower River Rouge")) %>%
   group_by(monitoring_location_id, time) %>%
   mutate(mean_o_state = mean(value)) %>%
-<<<<<<< HEAD
-  mutate(year = year(time)) %>%
-  
-  
-=======
   mutate(year = year(time))
 
 dO_data_avail <- read_waterdata_ts_meta(parameter_code = "00300") 
@@ -169,7 +164,6 @@ dO_data_avail <- dO_data_avail %>%
 ```
 
 ```{r}
->>>>>>> 9c9411a (todays work)
 states_cleaned %>%
   filter(parameter_code == "00300") %>%
   filter(statistic_id == "00003") %>%
