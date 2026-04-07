@@ -18,9 +18,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Hypotheses
 
-> 
+> At a given site, as temperature increases disolved oxygen will decrease because cold water can hold more disolved oxygen than warm water
 
-> H0
+> Disolved oxygen will be lower during the summer because of increased temperatures during these months
 
 > H etc
 
@@ -35,6 +35,7 @@ library(dplyr)
 library(usmap)
 library(sf)
 library(lubridate)
+library(tidyverse)
 ```
 
 ## Data Wrangling
@@ -89,7 +90,7 @@ Michigan_sites <- c("USGS-040325155", "USGS-04057801", "USGS-04137025", "USGS-04
 
 # make variable vectors
 sites <- c(Wisconsin_sites, Minnesota_sites, Michigan_sites)
-param_code <- "00300"
+param_code <- c("00300", "63680", "00010", "00021")
 start <- "2010-01-01"
 end <- "2025-01-01"
 zone = "America/Chicago"
@@ -101,8 +102,6 @@ waterdat <- read_waterdata_daily(
   time = as.POSIXct(c(start, end), 
   tz = zone))
 
-
-  
 # find all locations with dissolved oxygen
 # dO_locations <- unique(unlist(dO_data_avail$monitoring_location_id))
 # dO_data <- read_waterdata_daily(monitoring_location_id = dO_locations, 
@@ -128,8 +127,7 @@ waterdat_cleaned <- waterdat %>%
 
 waterdat_cleaned %>%
   filter(statistic_id == "00003") %>%
-  group_by(season, monitoring_location_id) %>%
-  summarise(mean_o = mean(value)) # mean O level
+  group_by(season, monitoring_location_id)
 
 # make new var that declares whether av/max/min/whatever is above or below healthy threshold (based on lit)
 ```
@@ -144,11 +142,30 @@ states_cleaned <- waterdat_cleaned %>%
   mutate(location = case_when(monitoring_location_id %in% Michigan_sites ~ "Michigan",
                               monitoring_location_id %in% Minnesota_sites ~ "Minnesota",
                               monitoring_location_id %in% Wisconsin_sites ~ "Wisconsin")) %>%
+  mutate(site_name = case_when(monitoring_location_id == "USGS-04067500" ~ "Menominee River",
+                               monitoring_location_id == "USGS-04084485" ~ "FOX R. CANAL AT LOCK & DAM",
+                               monitoring_location_id == "USGS-04087170" ~ "Milwaukee River",
+                               monitoring_location_id == "USGS-04085427" ~ "Manitowoc River",
+                               monitoring_location_id == "USGS-04024000" ~ "St. Louis River",
+                               monitoring_location_id == "USGS-05062130" ~ "Red River",
+                               monitoring_location_id == "USGS-040325155" ~ "Mineral River DS",
+                               monitoring_location_id == "USGS-04057801" ~ "M BR Escanaba R",
+                               monitoring_location_id == "USGS-04137025" ~ "AU Sable River",
+                               monitoring_location_id == "USGS-04168400" ~ "Lower River Rouge")) %>%
   group_by(monitoring_location_id, time) %>%
   mutate(mean_o_state = mean(value)) %>%
   mutate(year = year(time))
-  
+
+dO_data_avail <- read_waterdata_ts_meta(parameter_code = "00300") 
+
+dO_data_avail <- dO_data_avail %>% 
+  filter(computation_identifier == "Mean") %>%
+  filter(state_name %in% c("Minnesota", "Wisconsin", "Michigan"))
+```
+
+```{r}
 states_cleaned %>%
+  filter(parameter_code == "00300") %>%
   filter(statistic_id == "00003") %>%
   ggplot(aes(x = season, y = value, color = location)) +
   geom_boxplot() +
@@ -156,6 +173,7 @@ states_cleaned %>%
 
 states_cleaned %>%
   filter(statistic_id == "00002") %>%
+  filter(parameter_code == "00300") %>%
   ggplot(aes(x = season, y = value, color = location)) +
   geom_boxplot() +
   geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6) +
@@ -163,18 +181,48 @@ states_cleaned %>%
 
 states_cleaned %>%
   filter(statistic_id == "00002") %>%
-  ggplot(aes(x = time, y = value, color = monitoring_location_id)) +
+  filter(parameter_code == "00300") %>%
+  filter(!(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River"))) %>%
+  ggplot(aes(x = time, y = value, color = location)) +
   geom_line() +
   geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "red") +
-  facet_wrap(~location)
+  facet_wrap(~site_name, ncol = 1) +
+  theme_minimal()
 
-dO_data_avail <- read_waterdata_ts_meta(parameter_code = "00300") 
+states_cleaned %>%
+  filter(statistic_id == "00002") %>%
+  filter(parameter_code == "00300") %>%
+  filter(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River")) %>%
+  ggplot(aes(x = time, y = value, color = location)) +
+  geom_line() +
+  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "red") +
+  facet_wrap(~site_name, ncol = 1) +
+  theme_minimal()
 
-dO_data_avail <- dO_data_avail %>% 
-  filter(computation_identifier == "Mean") %>%
-  filter(state_name %in% c("Minnesota", "Wisconsin", "Michigan"))
+states_cleaned_wide <- states_cleaned %>%
+  select(-unit_of_measure, -last_modified, -time_series_id) %>%
+  filter(statistic_id == "00003") %>%
+  mutate(parameter_name = case_when(parameter_code == "00300" ~ "dissolved_oxygen",
+                                    parameter_code == "00010" ~ "temperature",
+                                    parameter_code == "63680" ~ "turbulence",
+                                    TRUE ~ "other")) %>%
+  select(-parameter_code) %>%
+  pivot_wider(names_from = parameter_name, values_from = value)
 
+%>%
+  mutate(turbulence = na_if(turbulence, "NULL"))
 
+test <- states_cleaned_wide %>%
+  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(turbulence))) +
+  geom_point()
+test
+
+test <- states_cleaned %>%
+  mutate(parameter_name = if_else(parameter_code == "00300", "dissolved_o", "temperature")) %>%
+  pivot_wider(names_from = parameter_name, values_from = value) %>%
+  na.omit()
+  
+  ggplot(aes)
 ```
 
 # future ideas
@@ -223,3 +271,22 @@ oxygen (for each season?))
 what are potential drivers of this var - correlate two parameters
 
 ## start with oxygen and then maybe add in more vars
+
+
+## Variable importance analysis
+
+```{r}
+# read in data
+varimp <- read_waterdata_daily(
+  monitoring_location_id = sites, 
+  time = as.POSIXct(c(start, end), 
+  tz = zone))
+
+varimp_clean <- varimp %>%
+  filter(statistic_id == "00003") %>%
+  st_drop_geometry()
+ 
+varimp_wide <- varimp_clean %>%
+  pivot_wider(names_from = parameter_code, values_from = value)
+```
+
