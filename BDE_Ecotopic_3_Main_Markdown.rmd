@@ -133,7 +133,7 @@ waterdat_cleaned %>%
 ```{r}
 # name sites and filter for means
 states_cleaned <- waterdat_cleaned %>%
-  mutate(location = case_when(monitoring_location_id %in% Michigan_sites ~ "Michigan",
+  mutate(state = case_when(monitoring_location_id %in% Michigan_sites ~ "Michigan",
                               monitoring_location_id %in% Minnesota_sites ~ "Minnesota",
                               monitoring_location_id %in% Wisconsin_sites ~ "Wisconsin")) %>%
   mutate(site_name = case_when(monitoring_location_id == "USGS-04067500" ~ "Menominee River",
@@ -156,7 +156,7 @@ states_cleaned_wide <- states_cleaned %>%
   filter(statistic_id == "00003") %>%
   mutate(parameter_name = case_when(parameter_code == "00300" ~ "dissolved_oxygen",
                                     parameter_code == "00010" ~ "temperature",
-                                    parameter_code == "63680" ~ "turbulence",
+                                    parameter_code == "63680" ~ "turbidity",
                                     TRUE ~ "other")) %>%
   select(-parameter_code) %>%
   pivot_wider(id_cols = !time_series_id,
@@ -172,89 +172,119 @@ states_cleaned_wide <- states_cleaned %>%
 p1 <- states_cleaned %>%
   filter(parameter_code == "00300") %>%
   filter(statistic_id == "00003") %>%
-  ggplot(aes(x = season, y = value, color = location)) +
+  ggplot(aes(x = season, y = value, color = state)) +
   geom_boxplot() +
-  theme_minimal()
+  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.8, color = "red") +
+  theme_minimal() +
+  ylab("Mean Dissolved Oxygen (mg/l)")
+
 p1
 
 p2 <-states_cleaned %>%
   filter(statistic_id == "00002") %>%
   filter(parameter_code == "00300") %>%
-  ggplot(aes(x = season, y = value, color = location)) +
+  ggplot(aes(x = season, y = value, color = state)) +
   geom_boxplot() +
   geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.8, color = "red") +
-  theme_minimal()
+  theme_minimal() +
+  ylab("Min Dissolved Oxygen (mg/l)")
 p2
 
 p3 <- states_cleaned %>%
   filter(statistic_id == "00002") %>%
   filter(parameter_code == "00300") %>%
   filter(!(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River"))) %>%
-  ggplot(aes(x = time, y = value, color = location)) +
+  ggplot(aes(x = time, y = value, color = state)) +
   geom_line() +
   geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "red") +
   facet_wrap(~site_name, ncol = 1) +
-  theme_minimal()
+  theme_minimal() +
+  ylab("Mean Dissolved Oxygen (mg/l)")
 p3
 
 p4 <- states_cleaned %>%
   filter(statistic_id == "00002") %>%
   filter(parameter_code == "00300") %>%
   filter(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River")) %>%
-  ggplot(aes(x = time, y = value, color = location)) +
+  ggplot(aes(x = time, y = value, color = state)) +
   geom_line() +
   geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "red") +
   facet_wrap(~site_name, ncol = 1) +
-  theme_minimal()
+  theme_minimal() +
+  ylab("Mean Dissolved Oxygen (mg/l)")
 p4
 ```
 
 ## multi var visualizations RQ2
 ```{r}
-#### turbulence
+#### turbidity
 # general
 p5 <- states_cleaned_wide %>%
-  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(turbulence))) +
-  geom_point() +
+  ggplot(aes(y = as.numeric(dissolved_oxygen), x = as.numeric(turbidity))) +
+  geom_point(size = 0.5) +
   geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal()
+  theme_minimal() +
+  ylab("Disolved Oxygen (mg/l)") +
+  xlab("Turbidity (FNU)")
 p5
 
 # color by site wrao by state
 p6 <- states_cleaned_wide %>%
-  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(turbulence), color = site_name)) +
-  facet_wrap(~location, ncol = 1) +
-  geom_point() +
+  filter(state != "Michigan") %>%
+  ggplot(aes(y = as.numeric(dissolved_oxygen), x = as.numeric(turbidity), color = site_name)) +
+  facet_wrap(~state, ncol = 1) +
+  geom_point(size = 0.5) +
   geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal()
+  theme_minimal() +
+  ylab("Disolved Oxygen (mg/l)") +
+  xlab("Turbidity (FNU)")
 p6
 
 #### temp
 # general
 p7 <- states_cleaned_wide %>%
-  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(temperature))) +
-  geom_point() +
+  ggplot(aes(y = as.numeric(dissolved_oxygen), x = as.numeric(temperature))) +
+  geom_point(size = 0.5) +
   geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal()
+  theme_minimal() +
+  ylab("Disolved Oxygen (mg/l)") +
+  xlab("Temperature (F)")
 p7
 
 # color by site wrap by state
 p8 <- states_cleaned_wide %>%
-  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(temperature), color = site_name)) +
-  facet_wrap(~location, ncol = 1) +
+  ggplot(aes(y = as.numeric(dissolved_oxygen), x = as.numeric(temperature), color = site_name)) +
+  facet_wrap(~state, ncol = 1) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal()
+  theme_minimal() +
+  ylab("Disolved Oxygen (mg/l)") +
+  xlab("Temperature (F)")
 p8
 
 # no points (less clutter)
 p9 <- states_cleaned_wide %>%
-  ggplot(aes(x = as.numeric(dissolved_oxygen), y = as.numeric(temperature), color = site_name)) +
-  facet_wrap(~location, ncol = 1) +
+  ggplot(aes(y = as.numeric(dissolved_oxygen), x = as.numeric(temperature), color = site_name)) +
+  facet_wrap(~state, ncol = 1) +
   geom_smooth(method = "lm", se = FALSE) +
-  theme_minimal()
+  theme_minimal() +
+  ylab("Disolved Oxygen (mg/l)") +
+  xlab("Temperature (F)")
 p9
 ```
+
+# Model Building
+```{r}
+m5 <- lm(dissolved_oxygen ~ turbidity, data = states_cleaned_wide) 
+summary(m5)
+
+m6 <- lm(dissolved_oxygen ~ turbidity + site_name , data = states_cleaned_wide) 
+summary(m6)
+
+m7 <- lm(dissolved_oxygen ~ temperature , data = states_cleaned_wide) 
+summary(m7)
+```
+
 
 
 ## Map of study sites
