@@ -305,9 +305,9 @@ water_dat_labeled_sites <- states_cleaned %>%
 
 map <- plot_usmap(include = .midwest_region, labels = TRUE) +
   geom_sf(data = water_dat_labeled_sites, color = "blue", size = 4, shape = 8) +
-  geom_sf_text(data = water_dat_labeled_sites, aes(label = site_name))
-  
-map
+  geom_sf_text(data = water_dat_labeled_sites, aes(label = site_name), nudge_y = -50000, color = "red", check_overlap = TRUE)
+
+map + ggtitle("Monitoring Site Locations") + theme(plot.title = element_text(size = 12, face = "bold", hjust = 0.5))
 ```
 
 
