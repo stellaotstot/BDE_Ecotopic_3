@@ -273,6 +273,37 @@ p9 <- states_cleaned_wide %>%
 p9
 ```
 
+```{r}
+states_cleaned_wide %>%
+  drop_na(turbulence) %>%
+  drop_na(dissolved_oxygen) %>%
+  filter(year(time) %in% 2020
+         :2025) %>%
+ggplot(aes(x = time)) +
+  geom_line(aes(y = dissolved_oxygen), color = "blue") +
+  geom_line(aes(y = turbulence), color = "red") +
+  facet_wrap(~site_name, ncol = 1) +
+  scale_y_log10()
+
+states_cleaned_wide %>%
+  drop_na(temperature) %>%
+  drop_na(dissolved_oxygen) %>%
+  filter(year(time) %in% 2020:2025) %>%
+  filter(!(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River", "Manitowoc River"))) %>%
+ggplot(aes(x = time)) +
+  geom_line(aes(y = dissolved_oxygen, color = "blue")) +
+  geom_line(aes(y = temperature, color = "red")) +
+  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "darkgrey") +
+  facet_wrap(~site_name, ncol = 1) + 
+  labs(y = NULL, x = "Time") +
+  theme_classic()
+  #scale_colour_manual(name = 'Parameter', 
+         #values =c('red'='red','blue'='blue'), labels = c('Temperature','Dissolved Oxygen')) +
+
+```
+
+
+
 # Model Building
 ```{r}
 m5 <- lm(dissolved_oxygen ~ turbidity, data = states_cleaned_wide) 
