@@ -274,16 +274,24 @@ p9
 ```
 
 ```{r}
+colors1 <- c("Dissolved Oxygen (mg/l)" = "blue", "Turbidity (FNU)" = "red")
+
 states_cleaned_wide %>%
   drop_na(turbulence) %>%
   drop_na(dissolved_oxygen) %>%
-  filter(year(time) %in% 2020
-         :2025) %>%
+  filter(year(time) %in% 2020:2025) %>%
+  filter(!(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River", "Manitowoc River"))) %>%
 ggplot(aes(x = time)) +
-  geom_line(aes(y = dissolved_oxygen), color = "blue") +
-  geom_line(aes(y = turbulence), color = "red") +
-  facet_wrap(~site_name, ncol = 1) +
-  scale_y_log10()
+  geom_line(aes(y = dissolved_oxygen, color = "Dissolved Oxygen (mg/l)")) +
+  geom_line(aes(y = turbulence, color = "Turbidity (FNU)")) +
+  scale_y_log10() +
+  facet_wrap(~site_name, ncol = 1) + 
+  theme_classic() +
+  labs(y = NULL, x = "Time", color = NULL, title = "Dissolved Oxygen & Turbidity Over Time") +
+  scale_color_manual(values = colors1) +
+  theme(legend.position="bottom", legend.box = "horizontal", plot.title = element_text(hjust = 0.5))
+
+colors <- c("Dissolved Oxygen (mg/l)" = "blue", "Temperature (C)" = "red")
 
 states_cleaned_wide %>%
   drop_na(temperature) %>%
@@ -291,15 +299,14 @@ states_cleaned_wide %>%
   filter(year(time) %in% 2020:2025) %>%
   filter(!(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River", "Manitowoc River"))) %>%
 ggplot(aes(x = time)) +
-  geom_line(aes(y = dissolved_oxygen, color = "blue")) +
-  geom_line(aes(y = temperature, color = "red")) +
-  geom_hline(yintercept = 5, linetype = "dotted", linewidth = 0.6, color = "darkgrey") +
+  geom_line(aes(y = dissolved_oxygen, color = "Dissolved Oxygen (mg/l)")) +
+  geom_line(aes(y = temperature, color = "Temperature (C)")) +
   facet_wrap(~site_name, ncol = 1) + 
-  labs(y = NULL, x = "Time") +
-  theme_classic()
-  #scale_colour_manual(name = 'Parameter', 
-         #values =c('red'='red','blue'='blue'), labels = c('Temperature','Dissolved Oxygen')) +
-
+  theme_classic() +
+  labs(y = NULL, x = "Time", color = NULL, title = "Dissolved Oxygen & Temperature Over Time") +
+  scale_color_manual(values = colors) +
+  theme(legend.position="bottom", legend.box = "horizontal", plot.title = element_text(hjust = 0.5))
+ 
 ```
 
 
