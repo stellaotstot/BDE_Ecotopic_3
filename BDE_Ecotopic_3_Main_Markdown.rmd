@@ -80,6 +80,14 @@ library(tidyverse)
 >
 > Lower River Rouge at Dearborn, MI - USGS-04168400
 
+> *Missouri*
+>
+> Little Blue R. at Lees Summit Rd in Independence - USGS-06893820
+>
+> East Fork Black River near Lesterville, MO - USGS-07061270
+>
+> Mississippi River at Cape Girardeau, MO - USGS-07020850
+
 # Code
 
 ```{r}
@@ -87,9 +95,10 @@ library(tidyverse)
 Wisconsin_sites <- c("USGS-04067500", "USGS-04084485", "USGS-04087170", "USGS-04085427")
 Minnesota_sites <- c("USGS-04024000", "USGS-05062130")
 Michigan_sites <- c("USGS-040325155", "USGS-04057801", "USGS-04137025", "USGS-04168400")
+Missouri_sites <- c("USGS-06893820", "USGS-07061270", "USGS-07020850")
 
 # make variable vectors
-sites <- c(Wisconsin_sites, Minnesota_sites, Michigan_sites)
+sites <- c(Wisconsin_sites, Minnesota_sites, Michigan_sites, Missouri_sites)
 param_code <- c("00300", "63680", "00010", "00021")
 start <- "2010-01-01"
 end <- "2025-01-01"
@@ -134,8 +143,9 @@ waterdat_cleaned %>%
 # name sites and filter for means
 states_cleaned <- waterdat_cleaned %>%
   mutate(state = case_when(monitoring_location_id %in% Michigan_sites ~ "Michigan",
-                              monitoring_location_id %in% Minnesota_sites ~ "Minnesota",
-                              monitoring_location_id %in% Wisconsin_sites ~ "Wisconsin")) %>%
+                           monitoring_location_id %in% Minnesota_sites ~ "Minnesota",
+                           monitoring_location_id %in% Wisconsin_sites ~ "Wisconsin",
+                           monitoring_location_id %in% Missouri_sites ~ "Missouri")) %>%
   mutate(site_name = case_when(monitoring_location_id == "USGS-04067500" ~ "Menominee River",
                                monitoring_location_id == "USGS-04084485" ~ "FOX R. CANAL AT LOCK & DAM",
                                monitoring_location_id == "USGS-04087170" ~ "Milwaukee River",
@@ -145,7 +155,10 @@ states_cleaned <- waterdat_cleaned %>%
                                monitoring_location_id == "USGS-040325155" ~ "Mineral River DS",
                                monitoring_location_id == "USGS-04057801" ~ "M BR Escanaba R",
                                monitoring_location_id == "USGS-04137025" ~ "AU Sable River",
-                               monitoring_location_id == "USGS-04168400" ~ "Lower River Rouge")) %>%
+                               monitoring_location_id == "USGS-04168400" ~ "Lower River Rouge",
+                               monitoring_location_id == "USGS-06893820" ~ "Little Blue R.",
+                               monitoring_location_id == "USGS-07061270" ~ "East Fork Black River",
+                               monitoring_location_id == "USGS-07020850" ~ "Mississippi River")) %>%
   group_by(monitoring_location_id, time) %>%
   mutate(year = year(time))
 ```
@@ -163,6 +176,10 @@ states_cleaned_wide <- states_cleaned %>%
               names_from = parameter_name,
               values_from = value,
               values_fn = mean)
+
+# remove zeros from temp and turbidity, zeros are correct, do not run 
+#states_cleaned_wide$temperature[states_cleaned_wide$temperature == 0] <- NA
+#states_cleaned_wide$turbidity[states_cleaned_wide$turbidity == 0] <- NA
 ```
 
 # Visualizations
@@ -222,19 +239,19 @@ p4
 p5 <- states_cleaned_wide %>%
   ggplot(aes(y = as.numeric(dissolved_oxygen), x = as.numeric(turbidity))) +
   geom_point(size = 0.5) +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_smooth( se = FALSE) +
   theme_minimal() +
   ylab("Disolved Oxygen (mg/l)") +
   xlab("Turbidity (FNU)")
 p5
 
-# color by site wrao by state
+# color by site wrap by state
 p6 <- states_cleaned_wide %>%
   filter(state != "Michigan") %>%
   ggplot(aes(y = as.numeric(dissolved_oxygen), x = as.numeric(turbidity), color = site_name)) +
   facet_wrap(~state, ncol = 1) +
   geom_point(size = 0.5) +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_smooth( se = FALSE) +
   theme_minimal() +
   ylab("Disolved Oxygen (mg/l)") +
   xlab("Turbidity (FNU)")
@@ -277,13 +294,13 @@ p9
 colors1 <- c("Dissolved Oxygen (mg/l)" = "blue", "Turbidity (FNU)" = "red")
 
 states_cleaned_wide %>%
-  drop_na(turbulence) %>%
+  drop_na(turbidity) %>%
   drop_na(dissolved_oxygen) %>%
   filter(year(time) %in% 2020:2025) %>%
   filter(!(site_name %in% c("M BR Escanaba R", "Mineral River DS", "Red River", "Manitowoc River"))) %>%
 ggplot(aes(x = time)) +
   geom_line(aes(y = dissolved_oxygen, color = "Dissolved Oxygen (mg/l)")) +
-  geom_line(aes(y = turbulence, color = "Turbidity (FNU)")) +
+  geom_line(aes(y = turbidity, color = "Turbidity (FNU)")) +
   scale_y_log10() +
   facet_wrap(~site_name, ncol = 1) + 
   theme_classic() +
